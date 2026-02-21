@@ -1,15 +1,32 @@
 package com.ecommerce.notificationservice.service;
 
 import com.ecommerce.notificationservice.model.Notification;
+import com.ecommerce.notificationservice.telemetry.TelemetryClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
     
+    @Autowired
+    private TelemetryClient telemetryClient;
+    
+    @Value("${email.service.delay.ms:500}")
+    private int emailDelayMs;
+    
+    @Value("${sms.service.delay.ms:300}")
+    private int smsDelayMs;
+    
     public void sendNotification(Notification notification) {
+        long startTime = System.currentTimeMillis();
+        int statusCode = 200;
+        
         // Simulate email sending
         try {
-            Thread.sleep(500); // Simulate email sending delay
+            if (emailDelayMs > 0) {
+                Thread.sleep(emailDelayMs); // Simulate email sending delay
+            }
             
             // Simulate random email failures (5% chance)
             if (Math.random() < 0.05) {
@@ -29,15 +46,28 @@ public class EmailService {
             System.out.println("  Message: " + notification.getMessage().substring(0, Math.min(50, notification.getMessage().length())) + "...");
             
         } catch (InterruptedException e) {
+            statusCode = 500;
             Thread.currentThread().interrupt();
             throw new RuntimeException("Email sending interrupted");
+        } catch (RuntimeException e) {
+            statusCode = 500;
+            throw e;
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
+            telemetryClient.recordServiceCall("email-provider", "send_email", "POST", 
+                "smtp://email.service", duration, statusCode);
         }
     }
     
     public void sendSMS(String phoneNumber, String message) {
+        long startTime = System.currentTimeMillis();
+        int statusCode = 200;
+        
         // Simulate SMS sending
         try {
-            Thread.sleep(300); // Simulate SMS sending delay
+            if (smsDelayMs > 0) {
+                Thread.sleep(smsDelayMs); // Simulate SMS sending delay
+            }
             
             // Simulate random SMS failures (3% chance)
             if (Math.random() < 0.03) {
@@ -49,8 +79,16 @@ public class EmailService {
             System.out.println("  Message: " + message);
             
         } catch (InterruptedException e) {
+            statusCode = 500;
             Thread.currentThread().interrupt();
             throw new RuntimeException("SMS sending interrupted");
+        } catch (RuntimeException e) {
+            statusCode = 500;
+            throw e;
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
+            telemetryClient.recordServiceCall("sms-provider", "send_sms", "POST", 
+                "https://sms.service/api/send", duration, statusCode);
         }
     }
 }
