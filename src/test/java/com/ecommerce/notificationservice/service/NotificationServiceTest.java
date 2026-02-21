@@ -2,6 +2,7 @@ package com.ecommerce.notificationservice.service;
 
 import com.ecommerce.notificationservice.model.Notification;
 import com.ecommerce.notificationservice.repository.NotificationRepository;
+import com.ecommerce.notificationservice.telemetry.TelemetryClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,9 @@ class NotificationServiceTest {
 
     @Mock
     private EmailService emailService;
+    
+    @Mock
+    private TelemetryClient telemetryClient;
 
     @InjectMocks
     private NotificationService notificationService;

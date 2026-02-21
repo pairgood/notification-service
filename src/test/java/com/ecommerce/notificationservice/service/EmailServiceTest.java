@@ -1,9 +1,12 @@
 package com.ecommerce.notificationservice.service;
 
 import com.ecommerce.notificationservice.model.Notification;
+import com.ecommerce.notificationservice.telemetry.TelemetryClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,12 +15,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
+    @Mock
+    private TelemetryClient telemetryClient;
+    
+    @InjectMocks
     private EmailService emailService;
+    
     private Notification testNotification;
 
     @BeforeEach
     void setUp() {
-        emailService = new EmailService();
         testNotification = new Notification(
             1L,
             Notification.NotificationType.ORDER_CONFIRMATION,
@@ -30,7 +37,6 @@ class EmailServiceTest {
     void sendNotification_ShouldProcessNotificationSuccessfully() {
         // Test that the service can handle a normal notification without throwing exceptions
         // This tests the majority case where random failure doesn't occur
-        long startTime = System.currentTimeMillis();
         
         // Run the test multiple times to increase chance of success scenario
         boolean hasSucceeded = false;
@@ -46,9 +52,8 @@ class EmailServiceTest {
             }
         }
         
-        long endTime = System.currentTimeMillis();
-        // Verify some delay occurred (at least some attempts with Thread.sleep)
-        assertThat(endTime - startTime).isGreaterThan(0);
+        // Verify at least one attempt succeeded
+        assertThat(hasSucceeded).isTrue();
     }
 
     @Test

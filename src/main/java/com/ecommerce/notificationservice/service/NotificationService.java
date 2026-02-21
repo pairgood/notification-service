@@ -2,6 +2,7 @@ package com.ecommerce.notificationservice.service;
 
 import com.ecommerce.notificationservice.model.Notification;
 import com.ecommerce.notificationservice.repository.NotificationRepository;
+import com.ecommerce.notificationservice.telemetry.TelemetryClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,9 @@ public class NotificationService {
     
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private TelemetryClient telemetryClient;
     
     public Notification sendOrderConfirmation(Long orderId, Long userId) {
         String subject = "Order Confirmation - Order #" + orderId;
@@ -121,8 +125,11 @@ public class NotificationService {
     }
     
     private Notification processNotification(Notification notification) {
+        telemetryClient.logEvent("Processing notification: " + notification.getType(), "INFO");
+        
         // Save notification to database
         notification = notificationRepository.save(notification);
+        telemetryClient.logEvent("Notification saved to database with ID: " + notification.getId(), "INFO");
         
         try {
             // Send email notification
@@ -131,10 +138,12 @@ public class NotificationService {
             // Update notification status to sent
             notification.setStatus(Notification.NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
+            telemetryClient.logEvent("Notification sent successfully", "INFO");
             
         } catch (Exception e) {
             // If sending fails, mark as failed
             notification.setStatus(Notification.NotificationStatus.FAILED);
+            telemetryClient.logEvent("Failed to send notification: " + e.getMessage(), "ERROR");
             System.err.println("Failed to send notification: " + e.getMessage());
         }
         

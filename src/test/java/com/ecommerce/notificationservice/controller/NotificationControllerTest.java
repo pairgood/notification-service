@@ -3,6 +3,7 @@ package com.ecommerce.notificationservice.controller;
 import com.ecommerce.notificationservice.dto.*;
 import com.ecommerce.notificationservice.model.Notification;
 import com.ecommerce.notificationservice.service.NotificationService;
+import com.ecommerce.notificationservice.telemetry.TelemetryClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,9 @@ class NotificationControllerTest {
 
     @MockBean
     private NotificationService notificationService;
+    
+    @MockBean
+    private TelemetryClient telemetryClient;
 
     @Autowired
     private ObjectMapper objectMapper;
