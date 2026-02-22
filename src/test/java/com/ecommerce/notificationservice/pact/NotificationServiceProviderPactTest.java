@@ -26,7 +26,10 @@ import static org.mockito.Mockito.when;
 @Provider("notification-service")   // MUST match spring.application.name exactly
 @PactBroker(
     url = "http://localhost:9292",
-    authentication = @PactBrokerAuth(username = "admin", password = "admin")
+    authentication = @PactBrokerAuth(username = "admin", password = "admin"),
+    consumerVersionSelectors = {
+        @au.com.dius.pact.provider.junitsupport.loader.VersionSelector(tag = "main", latest = "false")
+    }
 )
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
