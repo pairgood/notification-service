@@ -1,0 +1,68 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+    id 'jacoco'
+    id 'au.com.dius.pact' version '4.6.5'
+}
+
+group = 'com.ecommerce'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'au.com.dius.pact.consumer:junit5:4.6.5'
+    testImplementation 'au.com.dius.pact.provider:junit5spring:4.6.5'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+        html.outputLocation = file("${buildDir}/reports/jacoco")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+pact {
+    publish {
+        pactBrokerUrl = 'http://localhost:9292'
+        pactBrokerUsername = 'admin'
+        pactBrokerPassword = 'admin'
+        tags = ['main']
+        version = project.version ?: '1.0.0'
+    }
+    serviceProviders {
+        create(findProperty('spring.application.name') ?: project.name) {
+            fromPactBroker {
+                selectors = latestTags('main')
+                enablePending = false
+                providerTags = ['main']
+            }
+        }
+    }
+}
