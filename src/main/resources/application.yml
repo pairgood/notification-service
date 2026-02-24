@@ -46,7 +46,7 @@ management:
           include: livenessState,diskSpace
           show-details: always
         readiness:
-          include: readinessState,db,mail,telemetryService
+          include: readinessState,db,telemetryService
           show-details: always
   health:
     livenessstate:
