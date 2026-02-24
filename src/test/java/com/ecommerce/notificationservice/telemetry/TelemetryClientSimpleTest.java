@@ -3,6 +3,7 @@ package com.ecommerce.notificationservice.telemetry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,7 +13,7 @@ class TelemetryClientSimpleTest {
 
     @BeforeEach
     void setUp() {
-        telemetryClient = new TelemetryClient();
+        telemetryClient = new TelemetryClient(WebClient.builder());
         ReflectionTestUtils.setField(telemetryClient, "telemetryServiceUrl", "http://localhost:8086");
         ReflectionTestUtils.setField(telemetryClient, "serviceName", "notification-service");
         
