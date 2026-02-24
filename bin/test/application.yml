@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: notification-service
+
+# Fast tests - no delays
+email:
+  service:
+    delay:
+      ms: 0
+
+sms:
+  service:
+    delay:
+      ms: 0
